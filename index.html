@@ -1,0 +1,698 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8"/>
+<meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+<title>K Manimaran — Frontend Developer</title>
+<link href="https://fonts.googleapis.com/css2?family=JetBrains+Mono:wght@300;400;500;700&family=Syne:wght@400;600;700;800&display=swap" rel="stylesheet"/>
+<style>
+:root {
+  --bg:       #09080f;
+  --bg2:      #0f0d1a;
+  --bg3:      #13101f;
+  --purple:   #a855f7;
+  --violet:   #7c3aed;
+  --pink:     #e879f9;
+  --glow:     rgba(168,85,247,.35);
+  --dim:      rgba(168,85,247,.12);
+  --text:     #e2d9f3;
+  --muted:    #6b5f8a;
+  --border:   rgba(168,85,247,.18);
+  --green:    #4ade80;
+  --cyan:     #22d3ee;
+  --mono:     'JetBrains Mono', monospace;
+  --sans:     'Syne', sans-serif;
+}
+*,*::before,*::after{box-sizing:border-box;margin:0;padding:0}
+html{scroll-behavior:smooth;scrollbar-width:thin;scrollbar-color:var(--violet) var(--bg2)}
+body{
+  background:var(--bg);
+  color:var(--text);
+  font-family:var(--mono);
+  overflow-x:hidden;
+  cursor:none;
+}
+
+/* ── CUSTOM CURSOR ── */
+#cursor{
+  position:fixed;width:14px;height:14px;
+  border:1.5px solid var(--purple);
+  border-radius:50%;pointer-events:none;
+  transition:transform .1s,opacity .2s;
+  mix-blend-mode:screen;z-index:9999;
+}
+#cursor-trail{
+  position:fixed;width:36px;height:36px;
+  border:1px solid var(--glow);border-radius:50%;
+  pointer-events:none;transition:transform .25s,opacity .3s;
+  mix-blend-mode:screen;z-index:9998;
+}
+
+/* ── SCANLINES overlay ── */
+body::after{
+  content:'';position:fixed;inset:0;z-index:9990;pointer-events:none;
+  background:repeating-linear-gradient(
+    0deg,
+    transparent,transparent 2px,
+    rgba(0,0,0,.08) 2px,rgba(0,0,0,.08) 4px
+  );
+}
+
+/* ── NOISE GRAIN ── */
+body::before{
+  content:'';position:fixed;inset:0;z-index:9989;pointer-events:none;
+  opacity:.04;
+  background-image:url("data:image/svg+xml,%3Csvg viewBox='0 0 256 256' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.9' numOctaves='4' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23n)'/%3E%3C/svg%3E");
+  background-size:200px 200px;
+}
+
+/* ── NAV ── */
+nav{
+  position:fixed;top:0;left:0;right:0;z-index:1000;
+  display:flex;align-items:center;justify-content:space-between;
+  padding:1.1rem 3rem;
+  background:rgba(9,8,15,.75);
+  backdrop-filter:blur(20px);
+  border-bottom:1px solid var(--border);
+}
+.nav-logo{
+  font-family:var(--sans);font-size:1.15rem;font-weight:800;
+  color:var(--purple);letter-spacing:.02em;
+  text-shadow:0 0 20px var(--glow);
+}
+.nav-logo span{color:var(--pink);}
+.nav-links{display:flex;gap:2rem;list-style:none;}
+.nav-links a{
+  font-size:.75rem;color:var(--muted);text-decoration:none;
+  letter-spacing:.12em;text-transform:uppercase;
+  transition:color .2s,text-shadow .2s;
+  position:relative;
+}
+.nav-links a::after{
+  content:'';position:absolute;bottom:-4px;left:0;width:0;height:1px;
+  background:var(--purple);transition:width .3s;
+}
+.nav-links a:hover{color:var(--purple);text-shadow:0 0 12px var(--glow);}
+.nav-links a:hover::after{width:100%;}
+.hamburger{display:none;flex-direction:column;gap:5px;cursor:none;background:none;border:none;padding:4px;}
+.hamburger span{display:block;width:24px;height:1.5px;background:var(--purple);transition:all .3s;}
+
+/* ── HERO ── */
+#hero{
+  min-height:100vh;display:flex;align-items:center;
+  padding:8rem 3rem 4rem;
+  position:relative;overflow:hidden;
+}
+.hero-grid{
+  display:grid;grid-template-columns:1fr 1fr;
+  gap:4rem;align-items:center;max-width:1200px;margin:0 auto;width:100%;
+}
+.hero-bg{
+  position:absolute;inset:0;
+  background:radial-gradient(ellipse 70% 60% at 70% 50%,rgba(124,58,237,.13) 0%,transparent 70%),
+             radial-gradient(ellipse 40% 40% at 20% 80%,rgba(232,121,249,.07) 0%,transparent 60%);
+}
+.hero-lines{
+  position:absolute;inset:0;
+  background-image:
+    linear-gradient(rgba(168,85,247,.04) 1px,transparent 1px),
+    linear-gradient(90deg,rgba(168,85,247,.04) 1px,transparent 1px);
+  background-size:60px 60px;
+}
+.terminal-badge{
+  display:inline-flex;align-items:center;gap:.5rem;
+  font-size:.7rem;color:var(--green);letter-spacing:.1em;
+  border:1px solid rgba(74,222,128,.25);
+  border-radius:3px;padding:.3rem .75rem;margin-bottom:1.5rem;
+}
+.terminal-badge::before{content:'> ';color:var(--muted);}
+.blink{animation:blink .9s step-end infinite;}
+@keyframes blink{0%,100%{opacity:1}50%{opacity:0}}
+
+h1.hero-name{
+  font-family:var(--sans);font-size:clamp(2.8rem,6vw,5rem);
+  font-weight:800;line-height:1.05;letter-spacing:-.02em;
+  color:#fff;margin-bottom:.75rem;
+}
+h1.hero-name .accent{
+  background:linear-gradient(135deg,var(--purple),var(--pink));
+  -webkit-background-clip:text;-webkit-text-fill-color:transparent;
+  background-clip:text;
+}
+.hero-role{
+  font-size:.85rem;color:var(--muted);letter-spacing:.08em;
+  text-transform:uppercase;margin-bottom:1.5rem;
+}
+.hero-role span{color:var(--cyan);}
+.hero-bio{
+  font-size:.88rem;line-height:1.9;color:rgba(226,217,243,.65);
+  max-width:480px;margin-bottom:2.5rem;
+  border-left:2px solid var(--violet);padding-left:1.2rem;
+}
+.hero-ctas{display:flex;gap:1rem;flex-wrap:wrap;}
+.btn-primary{
+  display:inline-flex;align-items:center;gap:.5rem;
+  padding:.7rem 1.75rem;font-family:var(--mono);font-size:.78rem;
+  letter-spacing:.08em;text-transform:uppercase;text-decoration:none;
+  background:linear-gradient(135deg,var(--violet),var(--purple));
+  color:#fff;border:none;border-radius:4px;cursor:none;
+  box-shadow:0 0 24px rgba(124,58,237,.4);
+  transition:transform .2s,box-shadow .2s;
+}
+.btn-primary:hover{transform:translateY(-2px);box-shadow:0 0 36px rgba(168,85,247,.6);}
+.btn-ghost{
+  display:inline-flex;align-items:center;gap:.5rem;
+  padding:.7rem 1.75rem;font-family:var(--mono);font-size:.78rem;
+  letter-spacing:.08em;text-transform:uppercase;text-decoration:none;
+  background:transparent;color:var(--purple);
+  border:1px solid var(--border);border-radius:4px;cursor:none;
+  transition:background .2s,border-color .2s,transform .2s;
+}
+.btn-ghost:hover{background:var(--dim);border-color:var(--purple);transform:translateY(-2px);}
+
+/* ── TERMINAL CARD (hero right) ── */
+.terminal-card{
+  background:var(--bg2);border:1px solid var(--border);
+  border-radius:8px;overflow:hidden;
+  box-shadow:0 0 60px rgba(124,58,237,.15),0 0 0 1px rgba(168,85,247,.06);
+  position:relative;z-index:2;
+}
+.term-bar{
+  display:flex;align-items:center;gap:.5rem;
+  padding:.7rem 1rem;background:rgba(255,255,255,.03);
+  border-bottom:1px solid var(--border);
+}
+.term-dot{width:10px;height:10px;border-radius:50%;}
+.td1{background:#ff5f57;} .td2{background:#febc2e;} .td3{background:#28c840;}
+.term-title{margin-left:.5rem;font-size:.7rem;color:var(--muted);letter-spacing:.06em;}
+.term-body{padding:1.5rem;font-size:.78rem;line-height:2.1;min-height:320px;}
+.tc{color:var(--muted);}
+.tk{color:var(--cyan);}
+.tv{color:var(--green);}
+.tp{color:var(--purple);}
+.ts2{color:var(--pink);}
+.tw{color:#fff;}
+.term-line{display:flex;gap:.75rem;align-items:baseline;}
+.term-prompt{color:var(--violet);flex-shrink:0;}
+
+/* ── SECTION COMMON ── */
+section{padding:6rem 3rem;max-width:1200px;margin:0 auto;}
+.section-header{display:flex;align-items:center;gap:1rem;margin-bottom:3.5rem;}
+.section-num{font-size:.7rem;color:var(--violet);letter-spacing:.12em;}
+.section-title{
+  font-family:var(--sans);font-size:clamp(1.6rem,3vw,2.2rem);
+  font-weight:700;color:#fff;
+}
+.section-line{flex:1;height:1px;background:var(--border);}
+
+/* ── SKILLS ── */
+.skills-grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(280px,1fr));gap:1.25rem;}
+.skill-group{
+  background:var(--bg2);border:1px solid var(--border);
+  border-radius:6px;padding:1.4rem;
+  transition:border-color .3s,box-shadow .3s;
+}
+.skill-group:hover{border-color:rgba(168,85,247,.45);box-shadow:0 0 24px rgba(168,85,247,.1);}
+.sg-label{
+  font-size:.65rem;color:var(--violet);letter-spacing:.14em;
+  text-transform:uppercase;margin-bottom:1.1rem;
+  display:flex;align-items:center;gap:.5rem;
+}
+.sg-label::before{content:'//';color:var(--muted);}
+.skill-tags{display:flex;flex-wrap:wrap;gap:.5rem;}
+.skill-tag{
+  font-size:.72rem;padding:.3rem .7rem;
+  background:var(--dim);border:1px solid var(--border);
+  border-radius:3px;color:var(--text);letter-spacing:.04em;
+  transition:background .2s,color .2s,border-color .2s;
+}
+.skill-tag:hover{background:rgba(168,85,247,.2);color:var(--pink);border-color:var(--purple);}
+.skill-tag.featured{
+  background:rgba(168,85,247,.15);border-color:rgba(168,85,247,.4);color:var(--purple);
+}
+
+/* ── PROJECTS ── */
+.projects-grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(340px,1fr));gap:1.5rem;}
+.project-card{
+  background:var(--bg2);border:1px solid var(--border);
+  border-radius:8px;overflow:hidden;
+  transition:transform .3s,box-shadow .3s,border-color .3s;
+  position:relative;
+}
+.project-card::before{
+  content:'';position:absolute;inset:0;
+  background:linear-gradient(135deg,rgba(168,85,247,.07),transparent 60%);
+  opacity:0;transition:opacity .3s;pointer-events:none;
+}
+.project-card:hover{
+  transform:translateY(-5px);border-color:rgba(168,85,247,.4);
+  box-shadow:0 20px 60px rgba(124,58,237,.2);
+}
+.project-card:hover::before{opacity:1;}
+.project-screen{
+  height:160px;background:var(--bg3);
+  border-bottom:1px solid var(--border);
+  display:flex;align-items:center;justify-content:center;
+  font-size:2.5rem;position:relative;overflow:hidden;
+}
+.project-screen::after{
+  content:'';position:absolute;inset:0;
+  background:linear-gradient(135deg,var(--dim),transparent);
+}
+.project-body{padding:1.4rem;}
+.project-num{font-size:.65rem;color:var(--violet);letter-spacing:.12em;margin-bottom:.5rem;}
+.project-name{
+  font-family:var(--sans);font-size:1.1rem;font-weight:700;
+  color:#fff;margin-bottom:.6rem;
+}
+.project-desc{font-size:.78rem;color:rgba(226,217,243,.6);line-height:1.8;margin-bottom:1rem;}
+.project-stack{display:flex;flex-wrap:wrap;gap:.4rem;margin-bottom:1rem;}
+.stack-tag{
+  font-size:.65rem;padding:.2rem .55rem;
+  background:var(--dim);border:1px solid var(--border);
+  border-radius:2px;color:var(--purple);letter-spacing:.04em;
+}
+.project-links{display:flex;gap:.75rem;}
+.plink{
+  font-size:.7rem;color:var(--muted);text-decoration:none;
+  letter-spacing:.06em;transition:color .2s;
+  display:flex;align-items:center;gap:.3rem;
+}
+.plink:hover{color:var(--purple);}
+
+/* ── EDUCATION ── */
+.edu-timeline{position:relative;padding-left:2rem;}
+.edu-timeline::before{
+  content:'';position:absolute;left:0;top:8px;bottom:8px;
+  width:1px;background:linear-gradient(var(--violet),transparent);
+}
+.edu-item{
+  position:relative;margin-bottom:2.5rem;
+  padding:1.5rem;background:var(--bg2);
+  border:1px solid var(--border);border-radius:6px;
+  transition:border-color .3s,box-shadow .3s;
+}
+.edu-item:hover{border-color:rgba(168,85,247,.4);box-shadow:0 0 30px rgba(168,85,247,.08);}
+.edu-item::before{
+  content:'';position:absolute;left:-2.4rem;top:1.7rem;
+  width:8px;height:8px;border-radius:50%;
+  background:var(--violet);box-shadow:0 0 12px var(--glow);
+}
+.edu-year{font-size:.65rem;color:var(--violet);letter-spacing:.12em;margin-bottom:.5rem;}
+.edu-degree{
+  font-family:var(--sans);font-size:1.05rem;font-weight:700;color:#fff;margin-bottom:.3rem;
+}
+.edu-school{font-size:.8rem;color:var(--purple);}
+.edu-detail{font-size:.75rem;color:var(--muted);margin-top:.5rem;line-height:1.7;}
+
+/* ── ABOUT section (inside hero) — removed, merged ── */
+
+/* ── FOOTER ── */
+footer{
+  text-align:center;padding:3rem;
+  border-top:1px solid var(--border);
+  font-size:.72rem;color:var(--muted);letter-spacing:.08em;
+}
+footer span{color:var(--purple);}
+.footer-links{display:flex;justify-content:center;gap:2rem;margin-bottom:1rem;}
+.footer-links a{color:var(--muted);text-decoration:none;transition:color .2s;font-size:.72rem;letter-spacing:.08em;}
+.footer-links a:hover{color:var(--purple);}
+
+/* ── ANIMATIONS ── */
+.reveal{opacity:0;transform:translateY(28px);transition:opacity .7s,transform .7s;}
+.reveal.visible{opacity:1;transform:translateY(0);}
+@keyframes float{0%,100%{transform:translateY(0)}50%{transform:translateY(-10px)}}
+.float{animation:float 4s ease-in-out infinite;}
+
+/* ── MOBILE NAV ── */
+@media(max-width:768px){
+  nav{padding:1rem 1.5rem;}
+  .nav-links{
+    display:none;flex-direction:column;gap:1.5rem;
+    position:fixed;inset:0;background:rgba(9,8,15,.97);
+    justify-content:center;align-items:center;z-index:999;
+  }
+  .nav-links.open{display:flex;}
+  .nav-links a{font-size:1rem;}
+  .hamburger{display:flex;}
+  .hero-grid{grid-template-columns:1fr;gap:2.5rem;text-align:center;}
+  .hero-bio{border-left:none;padding-left:0;border-top:2px solid var(--violet);padding-top:1rem;}
+  .hero-ctas{justify-content:center;}
+  #hero{padding:7rem 1.5rem 3rem;}
+  section{padding:4rem 1.5rem;}
+  .terminal-card{display:none;}
+}
+@media(max-width:480px){
+  .projects-grid{grid-template-columns:1fr;}
+  .skills-grid{grid-template-columns:1fr;}
+}
+
+/* scrollbar */
+::-webkit-scrollbar{width:4px;}
+::-webkit-scrollbar-track{background:var(--bg);}
+::-webkit-scrollbar-thumb{background:var(--violet);border-radius:2px;}
+</style>
+</head>
+<body>
+
+<!-- Cursor -->
+<div id="cursor"></div>
+<div id="cursor-trail"></div>
+
+<!-- NAV -->
+<nav id="navbar">
+  <div class="nav-logo">km<span>.</span>dev</div>
+  <ul class="nav-links" id="nav-links">
+    <li><a href="#hero">~/home</a></li>
+    <li><a href="#skills">~/skills</a></li>
+    <li><a href="#projects">~/projects</a></li>
+    <li><a href="#education">~/education</a></li>
+  </ul>
+  <button class="hamburger" id="hamburger" aria-label="menu">
+    <span></span><span></span><span></span>
+  </button>
+</nav>
+
+<!-- HERO -->
+<section id="hero" style="padding-top:0;max-width:100%;margin:0;">
+  <div class="hero-bg"></div>
+  <div class="hero-lines"></div>
+  <div class="hero-grid" style="position:relative;z-index:2;">
+
+    <!-- LEFT -->
+    <div>
+      <div class="terminal-badge">status: actively_seeking_internships<span class="blink">_</span></div>
+      <h1 class="hero-name">
+        K<br><span class="accent">Manimaran</span>
+      </h1>
+      <p class="hero-role">Frontend Developer &nbsp;/&nbsp; <span>BTech CS '26</span></p>
+      <p class="hero-bio">
+        I craft pixel-perfect, responsive web interfaces using React, JavaScript &amp; CSS.
+        Final-year student at PRIST University, Tamil Nadu — turning ideas into
+        fast, beautiful web experiences.
+      </p>
+      <div class="hero-ctas">
+        <a href="#projects" class="btn-primary">
+          <svg width="14" height="14" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path d="M9 18l6-6-6-6"/></svg>
+          View Projects
+        </a>
+        <a href="mailto:manimarank900@gmail.com" class="btn-ghost">
+          <svg width="14" height="14" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path d="M4 4h16c1.1 0 2 .9 2 2v12c0 1.1-.9 2-2 2H4c-1.1 0-2-.9-2-2V6c0-1.1.9-2 2-2z"/><polyline points="22,6 12,13 2,6"/></svg>
+          Contact Me
+        </a>
+      </div>
+    </div>
+
+    <!-- RIGHT: TERMINAL -->
+    <div class="float">
+      <div class="terminal-card">
+        <div class="term-bar">
+          <div class="term-dot td1"></div>
+          <div class="term-dot td2"></div>
+          <div class="term-dot td3"></div>
+          <span class="term-title">manimaran@portfolio ~ zsh</span>
+        </div>
+        <div class="term-body">
+          <div class="term-line"><span class="term-prompt">➜</span><span class="tk">cat</span><span class="tw">profile.json</span></div>
+          <div style="margin:.5rem 0 1rem .5rem;border-left:1px solid var(--border);padding-left:1rem;">
+            <div><span class="tc">{</span></div>
+            <div style="padding-left:1rem;">
+              <span class="tk">"name"</span><span class="tc">: </span><span class="tv">"K Manimaran"</span><span class="tc">,</span>
+            </div>
+            <div style="padding-left:1rem;">
+              <span class="tk">"role"</span><span class="tc">: </span><span class="tv">"Frontend Developer"</span><span class="tc">,</span>
+            </div>
+            <div style="padding-left:1rem;">
+              <span class="tk">"location"</span><span class="tc">: </span><span class="tv">"Mannargudi, TN 🇮🇳"</span><span class="tc">,</span>
+            </div>
+            <div style="padding-left:1rem;">
+              <span class="tk">"stack"</span><span class="tc">: [</span>
+              <span class="ts2">"React"</span><span class="tc">, </span>
+              <span class="ts2">"CSS3"</span><span class="tc">, </span>
+              <span class="ts2">"JS"</span>
+              <span class="tc">],</span>
+            </div>
+            <div style="padding-left:1rem;">
+              <span class="tk">"education"</span><span class="tc">: </span><span class="tv">"BTech CS @ PRIST '26"</span><span class="tc">,</span>
+            </div>
+            <div style="padding-left:1rem;">
+              <span class="tk">"status"</span><span class="tc">: </span><span class="tp">"open_to_work"</span>
+            </div>
+            <div><span class="tc">}</span></div>
+          </div>
+          <div class="term-line"><span class="term-prompt">➜</span><span class="tk">git</span><span class="tw">log --oneline</span></div>
+          <div style="margin:.3rem 0;font-size:.72rem;">
+            <div><span class="tp">a3f2c1b</span> <span class="tc">feat: responsive portfolio v2.0</span></div>
+            <div><span class="tp">8d1e9f0</span> <span class="tc">fix: mobile nav hamburger</span></div>
+            <div><span class="tp">2b7a4c3</span> <span class="tc">style: purple terminal theme</span></div>
+          </div>
+          <div class="term-line"><span class="term-prompt">➜</span><span class="tw">█<span class="blink"> </span></span></div>
+        </div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- SKILLS -->
+<section id="skills">
+  <div class="section-header reveal">
+    <span class="section-num">01 //</span>
+    <h2 class="section-title">Skills</h2>
+    <div class="section-line"></div>
+  </div>
+  <div class="skills-grid">
+    <div class="skill-group reveal">
+      <div class="sg-label">Frontend Core</div>
+      <div class="skill-tags">
+        <span class="skill-tag featured">React.js</span>
+        <span class="skill-tag featured">JavaScript (ES6+)</span>
+        <span class="skill-tag featured">HTML5</span>
+        <span class="skill-tag featured">CSS3</span>
+        <span class="skill-tag">Tailwind CSS</span>
+        <span class="skill-tag">Responsive Design</span>
+      </div>
+    </div>
+    <div class="skill-group reveal">
+      <div class="sg-label">UI & Styling</div>
+      <div class="skill-tags">
+        <span class="skill-tag">CSS Animations</span>
+        <span class="skill-tag">CSS Grid / Flexbox</span>
+        <span class="skill-tag">Mobile-First Design</span>
+        <span class="skill-tag">Figma (basics)</span>
+        <span class="skill-tag">UI/UX Principles</span>
+      </div>
+    </div>
+    <div class="skill-group reveal">
+      <div class="sg-label">Tools & Workflow</div>
+      <div class="skill-tags">
+        <span class="skill-tag">Git</span>
+        <span class="skill-tag">GitHub</span>
+        <span class="skill-tag">VS Code</span>
+        <span class="skill-tag">Vercel</span>
+        <span class="skill-tag">Netlify</span>
+        <span class="skill-tag">REST APIs</span>
+      </div>
+    </div>
+    <div class="skill-group reveal">
+      <div class="sg-label">Learning Now</div>
+      <div class="skill-tags">
+        <span class="skill-tag">TypeScript</span>
+        <span class="skill-tag">Next.js</span>
+        <span class="skill-tag">Node.js (basics)</span>
+        <span class="skill-tag">AWS (Cloud Practitioner)</span>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- PROJECTS -->
+<section id="projects" style="max-width:100%;padding-left:3rem;padding-right:3rem;">
+  <div style="max-width:1200px;margin:0 auto;">
+  <div class="section-header reveal">
+    <span class="section-num">02 //</span>
+    <h2 class="section-title">Projects</h2>
+    <div class="section-line"></div>
+  </div>
+  <div class="projects-grid">
+
+    <div class="project-card reveal">
+      <div class="project-screen">
+        <span style="position:relative;z-index:1;filter:drop-shadow(0 0 16px var(--purple));">⚡</span>
+      </div>
+      <div class="project-body">
+        <div class="project-num">// project_01</div>
+        <div class="project-name">Personal Portfolio</div>
+        <div class="project-desc">A terminal-themed developer portfolio with smooth animations, responsive layout, and custom cursor — the one you're viewing right now.</div>
+        <div class="project-stack">
+          <span class="stack-tag">React</span>
+          <span class="stack-tag">CSS3</span>
+          <span class="stack-tag">JS</span>
+          <span class="stack-tag">Vercel</span>
+        </div>
+        <div class="project-links">
+          <a href="#" class="plink">
+            <svg width="12" height="12" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><circle cx="12" cy="12" r="10"/><path d="M12 8v4l3 3"/></svg>
+            Live Demo
+          </a>
+          <a href="https://github.com/Manimaran102-cell" class="plink" target="_blank">
+            <svg width="12" height="12" fill="currentColor" viewBox="0 0 24 24"><path d="M12 0C5.37 0 0 5.37 0 12c0 5.31 3.435 9.795 8.205 11.385.6.105.825-.255.825-.57 0-.285-.015-1.23-.015-2.235-3.015.555-3.795-.735-4.035-1.41-.135-.345-.72-1.41-1.23-1.695-.42-.225-1.02-.78-.015-.795.945-.015 1.62.87 1.845 1.23 1.08 1.815 2.805 1.305 3.495.99.105-.78.42-1.305.765-1.605-2.67-.3-5.46-1.335-5.46-5.925 0-1.305.465-2.385 1.23-3.225-.12-.3-.54-1.53.12-3.18 0 0 1.005-.315 3.3 1.23.96-.27 1.98-.405 3-.405s2.04.135 3 .405c2.295-1.56 3.3-1.23 3.3-1.23.66 1.65.24 2.88.12 3.18.765.84 1.23 1.905 1.23 3.225 0 4.605-2.805 5.625-5.475 5.925.435.375.81 1.095.81 2.22 0 1.605-.015 2.895-.015 3.3 0 .315.225.69.825.57A12.02 12.02 0 0024 12c0-6.63-5.37-12-12-12z"/></svg>
+            GitHub
+          </a>
+        </div>
+      </div>
+    </div>
+
+    <div class="project-card reveal">
+      <div class="project-screen">
+        <span style="position:relative;z-index:1;filter:drop-shadow(0 0 16px var(--cyan));">🌤</span>
+      </div>
+      <div class="project-body">
+        <div class="project-num">// project_02</div>
+        <div class="project-name">Weather UI App</div>
+        <div class="project-desc">Real-time weather app with animated backgrounds, geolocation support, and smooth CSS transitions. Search any city instantly.</div>
+        <div class="project-stack">
+          <span class="stack-tag">React</span>
+          <span class="stack-tag">OpenWeather API</span>
+          <span class="stack-tag">CSS Animations</span>
+        </div>
+        <div class="project-links">
+          <a href="#" class="plink">
+            <svg width="12" height="12" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><circle cx="12" cy="12" r="10"/><path d="M12 8v4l3 3"/></svg>
+            Live Demo
+          </a>
+          <a href="https://github.com/Manimaran102-cell" class="plink" target="_blank">
+            <svg width="12" height="12" fill="currentColor" viewBox="0 0 24 24"><path d="M12 0C5.37 0 0 5.37 0 12c0 5.31 3.435 9.795 8.205 11.385.6.105.825-.255.825-.57 0-.285-.015-1.23-.015-2.235-3.015.555-3.795-.735-4.035-1.41-.135-.345-.72-1.41-1.23-1.695-.42-.225-1.02-.78-.015-.795.945-.015 1.62.87 1.845 1.23 1.08 1.815 2.805 1.305 3.495.99.105-.78.42-1.305.765-1.605-2.67-.3-5.46-1.335-5.46-5.925 0-1.305.465-2.385 1.23-3.225-.12-.3-.54-1.53.12-3.18 0 0 1.005-.315 3.3 1.23.96-.27 1.98-.405 3-.405s2.04.135 3 .405c2.295-1.56 3.3-1.23 3.3-1.23.66 1.65.24 2.88.12 3.18.765.84 1.23 1.905 1.23 3.225 0 4.605-2.805 5.625-5.475 5.925.435.375.81 1.095.81 2.22 0 1.605-.015 2.895-.015 3.3 0 .315.225.69.825.57A12.02 12.02 0 0024 12c0-6.63-5.37-12-12-12z"/></svg>
+            GitHub
+          </a>
+        </div>
+      </div>
+    </div>
+
+    <div class="project-card reveal">
+      <div class="project-screen">
+        <span style="position:relative;z-index:1;filter:drop-shadow(0 0 16px var(--pink));">📋</span>
+      </div>
+      <div class="project-body">
+        <div class="project-num">// project_03</div>
+        <div class="project-name">Kanban Task Board</div>
+        <div class="project-desc">Drag-and-drop Kanban board with persistent localStorage, dark mode toggle, and smooth React state management — no Redux.</div>
+        <div class="project-stack">
+          <span class="stack-tag">React</span>
+          <span class="stack-tag">useReducer</span>
+          <span class="stack-tag">Drag & Drop</span>
+          <span class="stack-tag">localStorage</span>
+        </div>
+        <div class="project-links">
+          <a href="#" class="plink">
+            <svg width="12" height="12" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><circle cx="12" cy="12" r="10"/><path d="M12 8v4l3 3"/></svg>
+            Live Demo
+          </a>
+          <a href="https://github.com/Manimaran102-cell" class="plink" target="_blank">
+            <svg width="12" height="12" fill="currentColor" viewBox="0 0 24 24"><path d="M12 0C5.37 0 0 5.37 0 12c0 5.31 3.435 9.795 8.205 11.385.6.105.825-.255.825-.57 0-.285-.015-1.23-.015-2.235-3.015.555-3.795-.735-4.035-1.41-.135-.345-.72-1.41-1.23-1.695-.42-.225-1.02-.78-.015-.795.945-.015 1.62.87 1.845 1.23 1.08 1.815 2.805 1.305 3.495.99.105-.78.42-1.305.765-1.605-2.67-.3-5.46-1.335-5.46-5.925 0-1.305.465-2.385 1.23-3.225-.12-.3-.54-1.53.12-3.18 0 0 1.005-.315 3.3 1.23.96-.27 1.98-.405 3-.405s2.04.135 3 .405c2.295-1.56 3.3-1.23 3.3-1.23.66 1.65.24 2.88.12 3.18.765.84 1.23 1.905 1.23 3.225 0 4.605-2.805 5.625-5.475 5.925.435.375.81 1.095.81 2.22 0 1.605-.015 2.895-.015 3.3 0 .315.225.69.825.57A12.02 12.02 0 0024 12c0-6.63-5.37-12-12-12z"/></svg>
+            GitHub
+          </a>
+        </div>
+      </div>
+    </div>
+
+  </div>
+  </div>
+</section>
+
+<!-- EDUCATION -->
+<section id="education">
+  <div class="section-header reveal">
+    <span class="section-num">03 //</span>
+    <h2 class="section-title">Education</h2>
+    <div class="section-line"></div>
+  </div>
+  <div class="edu-timeline">
+    <div class="edu-item reveal">
+      <div class="edu-year">Nov 2022 — Apr 2026</div>
+      <div class="edu-degree">Bachelor of Technology — Computer Engineering</div>
+      <div class="edu-school">PRIST University, Tamil Nadu</div>
+      <div class="edu-detail">
+        Relevant coursework: Data Structures · DBMS · Operating Systems · Web Technologies<br>
+        Focus: Frontend web development · React ecosystem · Responsive UI design
+      </div>
+    </div>
+    <div class="edu-item reveal">
+      <div class="edu-year">Completed 2022</div>
+      <div class="edu-degree">Higher Secondary Education (Class XII)</div>
+      <div class="edu-school">St. Joseph's School, Mannargudi</div>
+      <div class="edu-detail">
+        Computer Science stream · Strong foundation in programming fundamentals
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- FOOTER -->
+<footer>
+  <div class="footer-links">
+    <a href="mailto:manimarank900@gmail.com">manimarank900@gmail.com</a>
+    <a href="https://www.linkedin.com/in/kmanimaran-61b732315" target="_blank">LinkedIn</a>
+    <a href="https://github.com/kmanimaran" target="_blank">GitHub</a>
+  </div>
+  <p>Designed & built by <span>K Manimaran</span> &nbsp;·&nbsp; © 2025</p>
+</footer>
+
+<script>
+// ── Cursor ──
+const cursor=document.getElementById('cursor');
+const trail=document.getElementById('cursor-trail');
+let mx=0,my=0,tx=0,ty=0;
+document.addEventListener('mousemove',e=>{
+  mx=e.clientX; my=e.clientY;
+  cursor.style.transform=`translate(${mx-7}px,${my-7}px)`;
+});
+function animTrail(){
+  tx+=(mx-tx)*.12; ty+=(my-ty)*.12;
+  trail.style.transform=`translate(${tx-18}px,${ty-18}px)`;
+  requestAnimationFrame(animTrail);
+}
+animTrail();
+document.querySelectorAll('a,button,.skill-tag,.project-card,.edu-item,.skill-group').forEach(el=>{
+  el.addEventListener('mouseenter',()=>{cursor.style.transform+=' scale(1.8)';cursor.style.background=`rgba(168,85,247,.25)`;});
+  el.addEventListener('mouseleave',()=>{cursor.style.background='transparent';});
+});
+
+// ── Hamburger ──
+const ham=document.getElementById('hamburger');
+const navLinks=document.getElementById('nav-links');
+ham.addEventListener('click',()=>{
+  navLinks.classList.toggle('open');
+  const spans=ham.querySelectorAll('span');
+  if(navLinks.classList.contains('open')){
+    spans[0].style.transform='rotate(45deg) translate(4px,5px)';
+    spans[1].style.opacity='0';
+    spans[2].style.transform='rotate(-45deg) translate(4px,-5px)';
+  }else{
+    spans.forEach(s=>{s.style.transform='';s.style.opacity='';});
+  }
+});
+navLinks.querySelectorAll('a').forEach(a=>{
+  a.addEventListener('click',()=>{
+    navLinks.classList.remove('open');
+    ham.querySelectorAll('span').forEach(s=>{s.style.transform='';s.style.opacity='';});
+  });
+});
+
+// ── Scroll reveal ──
+const observer=new IntersectionObserver(entries=>{
+  entries.forEach((e,i)=>{
+    if(e.isIntersecting){
+      setTimeout(()=>e.target.classList.add('visible'),i*80);
+    }
+  });
+},{threshold:.12});
+document.querySelectorAll('.reveal').forEach(el=>observer.observe(el));
+
+// ── Nav scroll style ──
+window.addEventListener('scroll',()=>{
+  document.getElementById('navbar').style.boxShadow=
+    scrollY>60?'0 4px 40px rgba(0,0,0,.5)':'none';
+});
+</script>
+</body>
+</html>
